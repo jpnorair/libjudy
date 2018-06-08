@@ -3,17 +3,24 @@ CC=gcc
 THISMACHINE := $(shell uname -srm | sed -e 's/ /-/g')
 THISSYSTEM	:= $(shell uname -s)
 
-TARGETLIB   ?= libjudy.$(THISSYSTEM).a
-VERSION     ?= "0.1.0"
+ifeq ($(THISSYSTEM),Darwin)
+# Mac can't do conditional selection of static and dynamic libs at link time.
+#	PRODUCTS := libjudy.$(THISSYSTEM).dylib libjudy.$(THISSYSTEM).a
+	PRODUCTS := libjudy.$(THISSYSTEM).a
+else ifeq ($(THISSYSTEM),Linux)
+	PRODUCTS := libjudy.$(THISSYSTEM).so libjudy.$(THISSYSTEM).a
+else
+	error "THISSYSTEM set to unknown value: $(THISSYSTEM)"
+endif
+
+VERSION     ?= 0.1.0
 PACKAGEDIR  ?= ./../_hbpkg/$(THISMACHINE)/libjudy.$(VERSION)
-
 TARGET      := libjudy_test
-
 
 SRCDIR      := src
 INCDIR      := ./include
-BUILDDIR    := build
-PRODUCTDIR  := bin
+BUILDDIR    := build/$(THISMACHINE)
+PRODUCTDIR  := bin/$(THISMACHINE)
 SRCEXT      := c
 DEPEXT      := d
 OBJEXT      := o
@@ -30,11 +37,12 @@ OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJE
 
 
 all: directories $(TARGET)
-lib: directories $(TARGETLIB)
+lib: directories $(PRODUCTS)
 remake: cleaner all
 
 
 install:
+	@rm -rf $(PACKAGEDIR)
 	@mkdir -p $(PACKAGEDIR)
 	@cp $(SRCDIR)/judy.h $(PACKAGEDIR)/
 	@cp -R $(PRODUCTDIR)/* $(PACKAGEDIR)/
@@ -60,9 +68,9 @@ cleaner: clean
 -include $(OBJECTS:.$(OBJEXT)=.$(DEPEXT))
 
 # Build of the test app with static lib
-libjudy_test: $(TARGETLIB)
-	$(CC) $(CFLAGS) $(DEF) $(INC) -c -o $(BUILDDIR)/libjudy-test.o ./test/libjudy-test.c
-	$(CC) $(CFLAGS) $(DEF) $(BUILDDIR)/libjudy-test.o $(INC) $(LIB:%=-L%) -ljudy -o $(PRODUCTDIR)/libjudy_test
+libjudy_test: $(PRODUCTS)
+#	$(CC) $(CFLAGS) $(DEF) $(INC) -c -o $(BUILDDIR)/libjudy-test.o ./test/libjudy-test.c
+#	$(CC) $(CFLAGS) $(DEF) $(BUILDDIR)/libjudy-test.o $(INC) $(LIB:%=-L%) -ljudy -o #$(PRODUCTDIR)/libjudy_test
 
 # Build the static library
 # Note: testing with libtool now, which may be superior to ar
@@ -72,6 +80,12 @@ libjudy.Darwin.a: $(OBJECTS)
 libjudy.Linux.a: $(OBJECTS)
 	$(eval LIBTOOL_OBJ := $(shell find $(BUILDDIR) -type f -name "*.$(OBJEXT)"))
 	libtool --tag=CC --mode=link $(CC) -all-static -g -O3 $(INC) $(LIB) -o $(PRODUCTDIR)/libjudy.a $(OBJECTS)
+
+# Build shared library
+libjudy.Linux.so: $(OBJECTS)
+	$(eval LIBTOOL_OBJ := $(shell find $(BUILDDIR) -type f -name "*.$(OBJEXT)"))
+	$(CC) -shared -fPIC -Wl,-soname,libjudy.so.1 -o $(PRODUCTDIR)/libjudy.so.$(VERSION) $(LIBTOOL_OBJ) -lc
+
 
 # Compile
 $(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
