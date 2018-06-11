@@ -79,7 +79,7 @@ libjudy.Darwin.a: $(OBJECTS)
 
 libjudy.Linux.a: $(OBJECTS)
 	$(eval LIBTOOL_OBJ := $(shell find $(BUILDDIR) -type f -name "*.$(OBJEXT)"))
-	libtool --tag=CC --mode=link $(CC) -all-static -g -O3 $(INC) $(LIB) -o $(PRODUCTDIR)/libjudy.a $(OBJECTS)
+	ar rcs -o $(PRODUCTDIR)/libjudy.a $(OBJECTS)
 
 # Build shared library
 libjudy.Linux.so: $(OBJECTS)
