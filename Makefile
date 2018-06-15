@@ -48,7 +48,7 @@ install:
 	@cp -R $(PRODUCTDIR)/* $(PACKAGEDIR)/
 	@rm -f $(PACKAGEDIR)/../libjudy
 	@ln -s libjudy.$(VERSION) ./$(PACKAGEDIR)/../libjudy
-
+	cd ../_hbsys && $(MAKE) sys_install INS_MACHINE=$(THISMACHINE) INS_PKGNAME=libjudy
 
 #Make the Directories
 directories:
