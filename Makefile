@@ -2,6 +2,13 @@ CC=gcc
 
 THISMACHINE := $(shell uname -srm | sed -e 's/ /-/g')
 THISSYSTEM	:= $(shell uname -s)
+TARGET		?= $(THISMACHINE)
+
+# libjudy is intended for implementation on the current machine
+# This may change in time, but for now it is the case in order to prevent build on C2000
+ifneq ($(TARGET),$(THISMACHINE))
+	error "Current versions of libjudy only compile on local machine targets"
+endif
 
 ifeq ($(THISSYSTEM),Darwin)
 # Mac can't do conditional selection of static and dynamic libs at link time.
@@ -15,7 +22,7 @@ endif
 
 VERSION     ?= 0.1.0
 PACKAGEDIR  ?= ./../_hbpkg/$(THISMACHINE)/libjudy.$(VERSION)
-TARGET      := libjudy_test
+TEST_APP    := libjudy_test
 
 SRCDIR      := src
 INCDIR      := ./include
@@ -36,7 +43,7 @@ SOURCES     := $(shell find $(SRCDIR) -type f -name "*.$(SRCEXT)")
 OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
 
 
-all: directories $(TARGET)
+all: directories $(TEST_APP)
 lib: directories $(PRODUCTS)
 remake: cleaner all
 
