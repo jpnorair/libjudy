@@ -40,6 +40,7 @@
 #include <memory.h>
 #include <stdlib.h>
 
+
 #ifdef linux
 #  define _FILE_OFFSET_BITS 64
 #  define _LARGEFILE_SOURCE
@@ -1177,7 +1178,6 @@ JudySlot * judy_strt( Judy * judy, const unsigned char * buff, unsigned int max 
     if( ( cell = judy_slot( judy, buff, max ) ) ) {
         return cell;
     }
-
     return judy_nxt( judy );
 }
 
