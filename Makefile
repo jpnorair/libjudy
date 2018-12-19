@@ -15,7 +15,9 @@ ifeq ($(THISSYSTEM),Darwin)
 #	PRODUCTS := libjudy.$(THISSYSTEM).dylib libjudy.$(THISSYSTEM).a
 	PRODUCTS := libjudy.$(THISSYSTEM).a
 else ifeq ($(THISSYSTEM),Linux)
-	PRODUCTS := libjudy.$(THISSYSTEM).so libjudy.$(THISSYSTEM).a
+	PRODUCTS := libjudy.$(THISSYSTEM).so libjudy.POSIX.a
+else ifeq ($(THISSYSTEM),CYGWIN_NT-10.0)
+	PRODUCTS := libjudy.POSIX.a
 else
 	error "THISSYSTEM set to unknown value: $(THISSYSTEM)"
 endif
@@ -84,7 +86,7 @@ libjudy_test: $(PRODUCTS)
 libjudy.Darwin.a: $(OBJECTS)
 	libtool -o $(PRODUCTDIR)/libjudy.a -static $(OBJECTS)
 
-libjudy.Linux.a: $(OBJECTS)
+libjudy.POSIX.a: $(OBJECTS)
 	$(eval LIBTOOL_OBJ := $(shell find $(BUILDDIR) -type f -name "*.$(OBJEXT)"))
 	ar rcs -o $(PRODUCTDIR)/libjudy.a $(OBJECTS)
 
