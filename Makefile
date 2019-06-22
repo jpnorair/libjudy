@@ -1,7 +1,8 @@
-CC=gcc
+CC := gcc
+LD := ld
 
-THISMACHINE := $(shell uname -srm | sed -e 's/ /-/g')
-THISSYSTEM	:= $(shell uname -s)
+THISMACHINE ?= $(shell uname -srm | sed -e 's/ /-/g')
+THISSYSTEM	?= $(shell uname -s)
 TARGET		?= $(THISMACHINE)
 
 # libjudy is intended for implementation on the current machine
@@ -34,8 +35,7 @@ SRCEXT      := c
 DEPEXT      := d
 OBJEXT      := o
 
-#CFLAGS      := -std=gnu99 -O -g -Wall
-CFLAGS      := -std=gnu99 -O3 -fPIC
+CFLAGS      ?= -std=gnu99 -O3 -fPIC
 LIB         := ./
 DEF         := 
 INC         := -I$(SRCDIR) $(LIB:%=-I%)
